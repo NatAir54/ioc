@@ -1,4 +1,4 @@
-package com.nataliiakoval.studying.dependency_injection_container;
+package com.nataliiakoval.studying.di_container;
 
 public class BeanDefinition {
 }
