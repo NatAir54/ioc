@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans>
+    <bean id="mailService" class="com.studying.ioc.entity.MailService">
+        <property name="protocol" value="POP3"/>
+        <property name="port" value="3000"/>
+    </bean>
+
+    <bean id="userService" class="com.studying.ioc.entity.UserService">
+        <constructor-arg ref="mailService"/>
+    </bean>
+
+    <bean id="paymentService" class="com.studying.ioc.entity.PaymentService">
+        <property name="mailService" ref="mailService"/>
+    </bean>
+
+    <bean id="paymentServiceWithMax" class="com.studying.ioc.entity.PaymentService">
+        <property name="mailService" ref="mailService"/>
+        <property name="maxAmount" value="5000"/>
+    </bean>
+</beans>

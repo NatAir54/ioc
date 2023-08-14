@@ -1,11 +1,12 @@
-package com.nataliiakoval.studying.entity;
+package com.studying.ioc.entity;
 
+import lombok.Data;
+
+@Data
 public class PaymentService {
     private MailService mailService;
+    private int maxAmount;
 
-    public void setMailService(MailService mailService) {
-        this.mailService = mailService;
-    }
 
     public void pay(String from, String to, double amount) {
         // payment logic

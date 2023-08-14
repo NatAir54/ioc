@@ -1,7 +1,9 @@
-package com.nataliiakoval.studying.entity;
+package com.studying.ioc.entity;
 
 public class UserService {
     private MailService mailService;
+
+    public UserService() {}
 
     public UserService(MailService mailService) {
         this.mailService = mailService;
@@ -9,7 +11,8 @@ public class UserService {
 
     public void sendEmailWithUsersCount() {
         int numberOfUsersInSystem = getUsersCount();
-        mailService.sendEmail("boss@project.com", "There are " + numberOfUsersInSystem + " users in system.");
+        System.out.println(numberOfUsersInSystem);
+        //mailService.sendEmail("boss@project.com", "There are " + numberOfUsersInSystem + " users in system.");
     }
 
     public int getUsersCount() {
