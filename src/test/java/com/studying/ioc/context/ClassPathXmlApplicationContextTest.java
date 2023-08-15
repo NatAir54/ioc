@@ -38,4 +38,19 @@ class ClassPathXmlApplicationContextTest {
         assertEquals(expected.toString(), actual.toString());
     }
 
+    @Test
+    public void testBeanPrimitiveDependencies() {
+        PaymentService paymentServiceWithMax = applicationContext.getBean("paymentServiceWithMax", PaymentService.class);
+        assertEquals(5000, paymentServiceWithMax.getMaxAmount());
+        MailService mailService = applicationContext.getBean(MailService.class);
+        assertNotNull(mailService);
+        assertEquals(3000, mailService.getPort());
+        assertEquals("POP3", mailService.getProtocol());
+    }
+
+    @Test
+    public void testBeanRefDependencies() {
+
+    }
+
 }
