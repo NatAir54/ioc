@@ -4,7 +4,6 @@ import com.studying.ioc.entity.Bean;
 import com.studying.ioc.entity.BeanDefinition;
 import com.studying.ioc.exception.BeanInstantiationException;
 import lombok.Data;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,7 +14,7 @@ import java.util.Map;
 @Data
 public class BeanFactory {
 
-    public List<Bean> getBeansReady(Map<String, BeanDefinition> beanDefinitionsMap) throws BeanInstantiationException {
+    public List<Bean> createBeans(Map<String, BeanDefinition> beanDefinitionsMap) throws BeanInstantiationException {
         List<Bean> beansInitialized = initializeBeans(beanDefinitionsMap);
         List<Bean> beansConstructorDependenciesInjected = injectConstructorDependencies(beansInitialized, beanDefinitionsMap);
         List<Bean> beansValueDependenciesInjected = injectValueDependencies(beansConstructorDependenciesInjected, beanDefinitionsMap);
@@ -88,6 +87,21 @@ public class BeanFactory {
                                             }
                                             if (field.getType() == Integer.TYPE || field.getType() == Integer.class) {
                                                 field.set(value, Integer.valueOf(dependency.getValue()));
+                                            }
+                                            if (field.getType().equals(Boolean.class) || field.getType().equals(Boolean.TYPE)) {
+                                                field.set(value, Boolean.valueOf(dependency.getValue()));
+                                            }
+                                            if (field.getType() == Long.TYPE || field.getType() == Long.class) {
+                                                field.set(value, Long.valueOf(dependency.getValue()));
+                                            }
+                                            if (field.getType() == Byte.TYPE || field.getType() == Byte.class) {
+                                                field.set(value, Byte.valueOf(dependency.getValue()));
+                                            }
+                                            if (field.getType() == Double.TYPE || field.getType() == Double.class) {
+                                                field.set(value, Double.valueOf(dependency.getValue()));
+                                            }
+                                            if (field.getType() == Float.TYPE || field.getType() == Float.class) {
+                                                field.set(value, Float.valueOf(dependency.getValue()));
                                             }
                                         } catch (IllegalAccessException e) {
                                             e.printStackTrace();

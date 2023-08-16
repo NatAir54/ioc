@@ -5,27 +5,26 @@ import com.studying.ioc.entity.BeanDefinition;
 import com.studying.ioc.exception.BeanInstantiationException;
 import com.studying.ioc.resource_reader.XmlBeanDefinitionReader;
 import com.studying.ioc.resource_reader.BeanDefinitionReader;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ClassPathXmlApplicationContext implements ApplicationContext {
-    private final String[] PATH;
-    private BeanDefinitionReader beanReader;
-    private Map<String, BeanDefinition> beanDefinitions;
     private List<Bean> beans;
 
-
     public ClassPathXmlApplicationContext(String... configXmlFilePath) {
-        this.PATH = configXmlFilePath;
-        getBeanDefinitionsFromBeanDefinitionReader();
-        fillBeansListFromBeanDefinitions();
+        BeanDefinitionReader beanReader = new XmlBeanDefinitionReader(configXmlFilePath);
+        Map<String, BeanDefinition> beanDefinitions = beanReader.readBeanDefinitions();
+        getBeansFromBeanDefinitions(beanDefinitions);
     }
 
     @Override
-    public void setBeanDefinitionReader(BeanDefinitionReader reader) {
-        this.beanReader = reader;
+    public List<String> getBeanNames() {
+        List<String> beanNames = new ArrayList<>();
+        for (Bean bean : beans) {
+            beanNames.add(bean.getBeanName());
+        }
+        return beanNames;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     public <T> T getBean(String id, Class<T> classType) {
         T object = null;
         for (Bean bean : beans) {
-            if(classType.isInstance(bean.getValue())) {
+            if (classType.isInstance(bean.getValue())) {
                 if (bean.getBeanName().equals(id)) {
                     object = classType.cast(bean.getValue());
                 }
@@ -63,24 +62,10 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
         return object;
     }
 
-    @Override
-    public List<String> getBeanNames() {
-        List<String> beanNames = new ArrayList<>();
-        for (Bean bean : beans) {
-            beanNames.add(bean.getBeanName());
-        }
-        return beanNames;
-    }
-
-    private void getBeanDefinitionsFromBeanDefinitionReader() {
-        setBeanDefinitionReader(new XmlBeanDefinitionReader(PATH));
-        beanDefinitions = beanReader.readBeanDefinitions();
-    }
-
-    private void fillBeansListFromBeanDefinitions() {
+    private void getBeansFromBeanDefinitions(Map<String, BeanDefinition> beanDefinitions) {
         BeanFactory beanFactory = new BeanFactory();
         try {
-            beans = beanFactory.getBeansReady(beanDefinitions);
+            beans = beanFactory.createBeans(beanDefinitions);
         } catch (BeanInstantiationException e) {
             e.printStackTrace();
         }
