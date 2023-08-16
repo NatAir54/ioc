@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClassPathXmlApplicationContextTest {
 
-    private final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("src/main/resources/context.xml");
+    private final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("src/main/resources/email-context.xml", "src/main/resources/context.xml");
 
     @Test
     public void testCreateBeansNotNull() {
@@ -40,6 +40,8 @@ class ClassPathXmlApplicationContextTest {
 
     @Test
     public void testBeanPrimitiveDependencies() {
+        PaymentService paymentService = applicationContext.getBean("paymentService", PaymentService.class);
+        assertEquals(0, paymentService.getMaxAmount());
         PaymentService paymentServiceWithMax = applicationContext.getBean("paymentServiceWithMax", PaymentService.class);
         assertEquals(5000, paymentServiceWithMax.getMaxAmount());
         MailService mailService = applicationContext.getBean(MailService.class);
@@ -50,7 +52,27 @@ class ClassPathXmlApplicationContextTest {
 
     @Test
     public void testBeanRefDependencies() {
+        PaymentService paymentService = applicationContext.getBean("paymentService", PaymentService.class);
+        assertNotNull(paymentService);
+        MailService mailService = paymentService.getMailService();
+        assertNotNull(mailService);
+        assertEquals(3000, mailService.getPort());
+        assertEquals("POP3", mailService.getProtocol());
+        PaymentService paymentServiceWithMax = applicationContext.getBean(PaymentService.class);
+        MailService mailService1 = paymentServiceWithMax.getMailService();
+        assertNotNull(mailService1);
+        assertEquals(3000, mailService1.getPort());
+        assertEquals("POP3", mailService1.getProtocol());
+    }
 
+    @Test
+    public void testBeanConstructorDependencies() {
+        UserService userService = (UserService) applicationContext.getBean("userService");
+        assertNotNull(userService);
+        MailService mailService = userService.getMailService();
+        assertNotNull(mailService);
+        assertEquals(3000, mailService.getPort());
+        assertEquals("POP3", mailService.getProtocol());
     }
 
 }

@@ -1,5 +1,8 @@
 package com.studying.ioc.entity;
 
+import lombok.Data;
+
+@Data
 public class UserService {
     private MailService mailService;
 
@@ -12,7 +15,7 @@ public class UserService {
     public void sendEmailWithUsersCount() {
         int numberOfUsersInSystem = getUsersCount();
         System.out.println(numberOfUsersInSystem);
-        //mailService.sendEmail("boss@project.com", "There are " + numberOfUsersInSystem + " users in system.");
+        mailService.sendEmail("boss@project.com", "There are " + numberOfUsersInSystem + " users in system.");
     }
 
     public int getUsersCount() {

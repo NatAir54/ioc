@@ -14,12 +14,12 @@ import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
 public class XMLStaxParser {
-    private Map<String, BeanDefinition> beanDefinitions = new HashMap<>();
-
+    private Map<String, BeanDefinition> beanDefinitions = new LinkedHashMap<>();
 
     void parseXmlFile(String... paths) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -62,20 +62,26 @@ public class XMLStaxParser {
                                 assert dependencies != null;
                                 refDependencies.put(propertyName, propertyValue);
                             }
+                        } else if (startElement.getName().getLocalPart().equals("constructor-arg")) {
+                            xmlEvent = reader.nextEvent();
+
+                            Attribute attributeRefValue = startElement.getAttributeByName(new QName("ref"));
+                            String propertyValue = attributeRefValue.getValue();
+                            assert refDependencies != null;
+                            refDependencies.put("propertyForConstructor", propertyValue);
                         }
                     }
 
                     if (xmlEvent.isEndElement()) {
                         EndElement endElement = xmlEvent.asEndElement();
-                        assert beanDefinition != null;
-                        beanDefinition.setDependencies(dependencies);
-                        beanDefinition.setRefDependencies(refDependencies);
                         if (endElement.getName().getLocalPart().equals("bean")) {
+                            assert beanDefinition != null;
+                            beanDefinition.setDependencies(dependencies);
+                            beanDefinition.setRefDependencies(refDependencies);
                             beanDefinitions.put(beanDefinition.getBeanName(), beanDefinition);
                         }
                     }
                 }
-
             } catch (XMLStreamException | FileNotFoundException e) {
                 e.printStackTrace();
             }
