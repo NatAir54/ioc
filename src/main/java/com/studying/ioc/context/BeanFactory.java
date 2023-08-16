@@ -14,21 +14,17 @@ import java.util.Map;
 
 @Data
 public class BeanFactory {
-    private final Map<String, BeanDefinition> beanDefinitionsMap;
-    private final List<Bean> BEANS = new ArrayList<>();
 
-    public BeanFactory(Map<String, BeanDefinition> beanDefinitionsMap) {
-        this.beanDefinitionsMap = beanDefinitionsMap;
+    public List<Bean> getBeansReady(Map<String, BeanDefinition> beanDefinitionsMap) throws BeanInstantiationException {
+        List<Bean> beansInitialized = initializeBeans(beanDefinitionsMap);
+        List<Bean> beansConstructorDependenciesInjected = injectConstructorDependencies(beansInitialized, beanDefinitionsMap);
+        List<Bean> beansValueDependenciesInjected = injectValueDependencies(beansConstructorDependenciesInjected, beanDefinitionsMap);
+        List<Bean> beansReady = injectRefDependencies(beansValueDependenciesInjected, beanDefinitionsMap);
+        return beansReady;
     }
 
-    void getBeansReady() throws BeanInstantiationException {
-        initializeBeans();
-        injectValueDependencies();
-        injectConstructorDependencies();
-        injectRefDependencies();
-    }
-
-    private void initializeBeans() throws BeanInstantiationException {
+    private List<Bean> initializeBeans(Map<String, BeanDefinition> beanDefinitionsMap) throws BeanInstantiationException {
+        List<Bean> beans = new ArrayList<>();
         for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
             Bean bean = new Bean();
             bean.setBeanName(item.getKey());
@@ -40,13 +36,41 @@ public class BeanFactory {
             } catch (Exception ex) {
                 throw new BeanInstantiationException("Bean creation failed");
             }
-            BEANS.add(bean);
+            beans.add(bean);
         }
+        return beans;
     }
 
-    private void injectValueDependencies() {
+    private List<Bean> injectConstructorDependencies(List<Bean> beans, Map<String, BeanDefinition> beanDefinitionsMap) throws BeanInstantiationException {
         for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
-            for (Bean bean : BEANS) {
+            for (Bean bean : beans) {
+                if (bean.getBeanName().equals(item.getKey())) {
+                    Class<?> someClass = bean.getValue().getClass();
+                    Map<String, String> refDependencies = item.getValue().getRefDependencies();
+                    for (Map.Entry<String, String> refDependency : refDependencies.entrySet()) {
+                        if (refDependency.getKey().equals("propertyForConstructor")) {
+                            for (Bean beanCreated : beans) {
+                                if ((refDependency.getValue().equals(beanCreated.getBeanName()))) {
+                                    Class<?> dependencyClass = beanCreated.getValue().getClass();
+                                    try {
+                                        Constructor<?> constructor = someClass.getDeclaredConstructor(dependencyClass);
+                                        bean.setValue(constructor.newInstance(beanCreated.getValue()));
+                                    } catch (Exception e) {
+                                        throw new BeanInstantiationException("Bean creation injecting constructor dependency failed");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return beans;
+    }
+
+    private List<Bean> injectValueDependencies(List<Bean> beans, Map<String, BeanDefinition> beanDefinitionsMap) {
+        for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
+            for (Bean bean : beans) {
                 if (bean.getBeanName().equals(item.getKey())) {
                     Object value = bean.getValue();
                     Map<String, String> dependencies = item.getValue().getDependencies();
@@ -76,37 +100,13 @@ public class BeanFactory {
                 }
             }
         }
+        return beans;
     }
 
-    private void injectConstructorDependencies() throws BeanInstantiationException {
-        for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
-            for (Bean bean : BEANS) {
-                if (bean.getBeanName().equals(item.getKey())) {
-                    Class<?> someClass = bean.getValue().getClass();
-                    Map<String, String> refDependencies = item.getValue().getRefDependencies();
-                    for (Map.Entry<String, String> refDependency : refDependencies.entrySet()) {
-                        if (refDependency.getKey().equals("propertyForConstructor")) {
-                            for (Bean beanCreated : BEANS) {
-                                if ((refDependency.getValue().equals(beanCreated.getBeanName()))) {
-                                    Class<?> dependencyClass = beanCreated.getValue().getClass();
-                                    try {
-                                        Constructor<?> constructor = someClass.getDeclaredConstructor(dependencyClass);
-                                        bean.setValue(constructor.newInstance(beanCreated.getValue()));
-                                    } catch (Exception e) {
-                                        throw new BeanInstantiationException("Bean creation failed");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
-    private void injectRefDependencies() {
+    private List<Bean> injectRefDependencies(List<Bean> beans, Map<String, BeanDefinition> beanDefinitionsMap) {
         for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
-            for (Bean bean : BEANS) {
+            for (Bean bean : beans) {
                 if (bean.getBeanName().equals(item.getKey())) {
                     Object value = bean.getValue();
                     Map<String, String> refDependencies = item.getValue().getRefDependencies();
@@ -118,7 +118,7 @@ public class BeanFactory {
                                 for (Method method : methods) {
                                     if (method.getName().equalsIgnoreCase("set" + refDependency.getKey())) {
                                         field.setAccessible(true);
-                                        for (Bean beanCreated : BEANS) {
+                                        for (Bean beanCreated : beans) {
                                             if (refDependency.getValue().equals(beanCreated.getBeanName())) {
                                                 try {
                                                     field.set(value, beanCreated.getValue());
@@ -135,6 +135,7 @@ public class BeanFactory {
                 }
             }
         }
+        return beans;
     }
 
 }

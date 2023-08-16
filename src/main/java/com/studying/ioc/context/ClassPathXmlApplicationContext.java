@@ -19,7 +19,8 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
 
     public ClassPathXmlApplicationContext(String... configXmlFilePath) {
         this.PATH = configXmlFilePath;
-        this.createContext();
+        getBeanDefinitionsFromBeanDefinitionReader();
+        fillBeansListFromBeanDefinitions();
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
         T object = null;
         for (Bean bean : beans) {
             if (bean.getValue().getClass().equals(classType)) {
-                object = (T) bean.getValue();
+                object = classType.cast(bean.getValue());
             }
         }
         return object;
@@ -53,9 +54,9 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     public <T> T getBean(String id, Class<T> classType) {
         T object = null;
         for (Bean bean : beans) {
-            if (bean.getValue().getClass().equals(classType)) {
+            if(classType.isInstance(bean.getValue())) {
                 if (bean.getBeanName().equals(id)) {
-                    object = (T) bean.getValue();
+                    object = classType.cast(bean.getValue());
                 }
             }
         }
@@ -71,21 +72,15 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
         return beanNames;
     }
 
-    private void createContext() {
-        setBeanDefinitionReader(new XmlBeanDefinitionReader(PATH));
-        getBeanDefinitionsFromBeanDefinitionReader();
-        fillBeansListFromBeanDefinitions();
-    }
-
     private void getBeanDefinitionsFromBeanDefinitionReader() {
+        setBeanDefinitionReader(new XmlBeanDefinitionReader(PATH));
         beanDefinitions = beanReader.readBeanDefinitions();
     }
 
     private void fillBeansListFromBeanDefinitions() {
-        BeanFactory beanFactory = new BeanFactory(beanDefinitions);
+        BeanFactory beanFactory = new BeanFactory();
         try {
-            beanFactory.getBeansReady();
-            beans = beanFactory.getBEANS();
+            beans = beanFactory.getBeansReady(beanDefinitions);
         } catch (BeanInstantiationException e) {
             e.printStackTrace();
         }
