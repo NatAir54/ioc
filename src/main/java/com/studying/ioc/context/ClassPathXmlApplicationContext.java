@@ -2,6 +2,7 @@ package com.studying.ioc.context;
 
 import com.studying.ioc.entity.Bean;
 import com.studying.ioc.entity.BeanDefinition;
+import com.studying.ioc.exception.BeanInstantiationException;
 import com.studying.ioc.resource_reader.XmlBeanDefinitionReader;
 import com.studying.ioc.resource_reader.BeanDefinitionReader;
 
@@ -81,6 +82,12 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     }
 
     private void fillBeansListFromBeanDefinitions() {
-        beans = new BeanFactory().createBeans(beanDefinitions);
+        BeanFactory beanFactory = new BeanFactory(beanDefinitions);
+        try {
+            beanFactory.getBeansReady();
+            beans = beanFactory.getBEANS();
+        } catch (BeanInstantiationException e) {
+            e.printStackTrace();
+        }
     }
 }
