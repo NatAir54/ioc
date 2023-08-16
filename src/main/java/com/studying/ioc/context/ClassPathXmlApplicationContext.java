@@ -30,7 +30,7 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     public Object getBean(String id) {
         Object value = new Object();
         for (Bean bean : beans) {
-            if(bean.getBeanName().equals(id)){
+            if (bean.getBeanName().equals(id)) {
                 value = bean.getValue();
             }
         }
@@ -41,7 +41,7 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     public <T> T getBean(Class<T> classType) {
         T object = null;
         for (Bean bean : beans) {
-            if(bean.getValue().getClass().equals(classType)) {
+            if (bean.getValue().getClass().equals(classType)) {
                 object = (T) bean.getValue();
             }
         }
@@ -52,8 +52,8 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
     public <T> T getBean(String id, Class<T> classType) {
         T object = null;
         for (Bean bean : beans) {
-            if(bean.getValue().getClass().equals(classType)) {
-                if(bean.getBeanName().equals(id)) {
+            if (bean.getValue().getClass().equals(classType)) {
+                if (bean.getBeanName().equals(id)) {
                     object = (T) bean.getValue();
                 }
             }
@@ -80,7 +80,7 @@ public class ClassPathXmlApplicationContext implements ApplicationContext {
         beanDefinitions = beanReader.readBeanDefinitions();
     }
 
-    private void fillBeansListFromBeanDefinitions(){
+    private void fillBeansListFromBeanDefinitions() {
         beans = new BeanFactory().createBeans(beanDefinitions);
     }
 }

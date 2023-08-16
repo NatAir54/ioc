@@ -1,6 +1,7 @@
 package com.studying.ioc.entity;
 
 import lombok.Data;
+
 import java.util.Map;
 
 @Data

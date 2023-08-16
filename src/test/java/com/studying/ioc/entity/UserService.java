@@ -6,7 +6,8 @@ import lombok.Data;
 public class UserService {
     private MailService mailService;
 
-    public UserService() {}
+    public UserService() {
+    }
 
     public UserService(MailService mailService) {
         this.mailService = mailService;

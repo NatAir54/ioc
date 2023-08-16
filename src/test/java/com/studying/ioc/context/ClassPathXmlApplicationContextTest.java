@@ -16,20 +16,6 @@ class ClassPathXmlApplicationContextTest {
     private final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("src/main/resources/email-context.xml", "src/main/resources/context.xml");
 
     @Test
-    public void testCreateBeansNotNull() {
-        MailService mailService = applicationContext.getBean(MailService.class);
-        assertNotNull(mailService);
-        UserService userService = (UserService) applicationContext.getBean("userService");
-        assertNotNull(userService);
-        UserService userService1 = applicationContext.getBean("userService", UserService.class);
-        assertNotNull(userService1);
-        PaymentService paymentService = applicationContext.getBean("paymentService", PaymentService.class);
-        assertNotNull(paymentService);
-        PaymentService paymentServiceWithMax = applicationContext.getBean("paymentServiceWithMax", PaymentService.class);
-        assertNotNull(paymentServiceWithMax);
-    }
-
-    @Test
     public void testGetBeanNames() {
         List<String> actual = applicationContext.getBeanNames();
         List<String> expected = new ArrayList<>(List.of("mailService", "userService", "paymentService", "paymentServiceWithMax"));
@@ -45,7 +31,6 @@ class ClassPathXmlApplicationContextTest {
         PaymentService paymentServiceWithMax = applicationContext.getBean("paymentServiceWithMax", PaymentService.class);
         assertEquals(5000, paymentServiceWithMax.getMaxAmount());
         MailService mailService = applicationContext.getBean(MailService.class);
-        assertNotNull(mailService);
         assertEquals(3000, mailService.getPort());
         assertEquals("POP3", mailService.getProtocol());
     }
@@ -53,14 +38,11 @@ class ClassPathXmlApplicationContextTest {
     @Test
     public void testBeanRefDependencies() {
         PaymentService paymentService = applicationContext.getBean("paymentService", PaymentService.class);
-        assertNotNull(paymentService);
         MailService mailService = paymentService.getMailService();
-        assertNotNull(mailService);
         assertEquals(3000, mailService.getPort());
         assertEquals("POP3", mailService.getProtocol());
         PaymentService paymentServiceWithMax = applicationContext.getBean(PaymentService.class);
         MailService mailService1 = paymentServiceWithMax.getMailService();
-        assertNotNull(mailService1);
         assertEquals(3000, mailService1.getPort());
         assertEquals("POP3", mailService1.getProtocol());
     }
@@ -68,11 +50,43 @@ class ClassPathXmlApplicationContextTest {
     @Test
     public void testBeanConstructorDependencies() {
         UserService userService = (UserService) applicationContext.getBean("userService");
-        assertNotNull(userService);
         MailService mailService = userService.getMailService();
         assertNotNull(mailService);
         assertEquals(3000, mailService.getPort());
         assertEquals("POP3", mailService.getProtocol());
     }
 
+    @Test
+    void testGetBeanByName() {
+        UserService userService = (UserService) applicationContext.getBean("userService");
+        assertNotNull(userService);
+        MailService mailService = (MailService) applicationContext.getBean("mailService");
+        assertNotNull(mailService);
+        PaymentService paymentService = (PaymentService) applicationContext.getBean("paymentService");
+        assertNotNull(paymentService);
+        PaymentService paymentServiceWithMax = (PaymentService) applicationContext.getBean("paymentServiceWithMax");
+        assertNotNull(paymentServiceWithMax);
+    }
+
+    @Test
+    void testGetBeanByType() {
+        MailService mailService = applicationContext.getBean(MailService.class);
+        assertNotNull(mailService);
+        UserService userService = applicationContext.getBean(UserService.class);
+        assertNotNull(userService);
+        PaymentService paymentService = applicationContext.getBean(PaymentService.class);
+        assertNotNull(paymentService);
+    }
+
+    @Test
+    void testGetBeanByNameAndType() {
+        MailService mailService = applicationContext.getBean("mailService", MailService.class);
+        assertNotNull(mailService);
+        UserService userService1 = applicationContext.getBean("userService", UserService.class);
+        assertNotNull(userService1);
+        PaymentService paymentService = applicationContext.getBean("paymentService", PaymentService.class);
+        assertNotNull(paymentService);
+        PaymentService paymentServiceWithMax = applicationContext.getBean("paymentServiceWithMax", PaymentService.class);
+        assertNotNull(paymentServiceWithMax);
+    }
 }

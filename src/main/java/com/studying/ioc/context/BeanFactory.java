@@ -14,7 +14,7 @@ public class BeanFactory {
     private final List<Bean> BEANS = new ArrayList<>();
 
     List<Bean> createBeans(Map<String, BeanDefinition> beanDefinitionsMap) {
-        for(Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
+        for (Map.Entry<String, BeanDefinition> item : beanDefinitionsMap.entrySet()) {
             Bean bean = new Bean();
             bean.setBeanName(item.getKey());
             String classType = item.getValue().getClassType();
@@ -54,7 +54,7 @@ public class BeanFactory {
 
 
     private void injectDependencies(Object value, Map<String, String> dependencies) {
-        if(dependencies != null) {
+        if (dependencies != null) {
             for (Map.Entry<String, String> dependency : dependencies.entrySet()) {
                 Field[] fields = value.getClass().getDeclaredFields();
                 for (Field field : fields) {
@@ -67,8 +67,7 @@ public class BeanFactory {
                             if (field.getType() == Integer.TYPE || field.getType() == Integer.class) {
                                 field.set(value, Integer.valueOf(dependency.getValue()));
                             }
-                        }
-                        catch (IllegalAccessException e) {
+                        } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     }
@@ -78,7 +77,7 @@ public class BeanFactory {
     }
 
     private void injectRefDependencies(Object value, Map<String, String> refDependencies) {
-        if(refDependencies != null) {
+        if (refDependencies != null) {
             for (Map.Entry<String, String> refDependency : refDependencies.entrySet()) {
                 Field[] fields = value.getClass().getDeclaredFields();
                 for (Field field : fields) {
