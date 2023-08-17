@@ -31,7 +31,8 @@ public class BeanFactory {
 
             try {
                 Class<?> someClass = Class.forName(classType);
-                bean.setValue(someClass.newInstance());
+                Constructor<?> constructor = someClass.getDeclaredConstructor();
+                bean.setValue(constructor.newInstance());
             } catch (Exception ex) {
                 throw new BeanInstantiationException("Bean creation failed");
             }
@@ -52,8 +53,24 @@ public class BeanFactory {
                                 if ((refDependency.getValue().equals(beanCreated.getBeanName()))) {
                                     Class<?> dependencyClass = beanCreated.getValue().getClass();
                                     try {
-                                        Constructor<?> constructor = someClass.getDeclaredConstructor(dependencyClass);
-                                        bean.setValue(constructor.newInstance(beanCreated.getValue()));
+                                        Constructor<?>[] constructors = someClass.getDeclaredConstructors();
+                                        for (Constructor<?> constructor : constructors) {
+                                            Class<?>[] parameterTypes = constructor.getParameterTypes();
+                                            for (Class<?> parameterType : parameterTypes) {
+                                                if (parameterType.equals(dependencyClass)) {
+                                                    Constructor<?> constructor1 = someClass.getDeclaredConstructor(dependencyClass);
+                                                    bean.setValue(constructor1.newInstance(beanCreated.getValue()));
+                                                } else {
+                                                    Class<?>[] interfaces = dependencyClass.getInterfaces();
+                                                    for (Class<?> anInterface : interfaces) {
+                                                        if (parameterType.equals(anInterface)) {
+                                                            Constructor<?> constructorI = someClass.getDeclaredConstructor(anInterface);
+                                                            bean.setValue(constructorI.newInstance(beanCreated.getValue()));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     } catch (Exception e) {
                                         throw new BeanInstantiationException("Bean creation injecting constructor dependency failed");
                                     }
