@@ -24,12 +24,8 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>verify</phase>
                         <goals>
-                            <!-- produce source artifact for project main sources -->
-                            <goal>jar-no-fork</goal>
-                            <!-- produce test source artifact for project test sources -->
-                            <goal>test-jar-no-fork</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
