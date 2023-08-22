@@ -33,8 +33,6 @@
                 </configuration>
             </plugin>
 
-
-
             <!-- create source jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -95,21 +93,6 @@
             <artifactId>logback-classic</artifactId>
             <version>1.4.11</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-deploy-plugin -->
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-deploy-plugin</artifactId>
-            <version>3.1.1</version>
-        </dependency>
-
 
     </dependencies>
 
